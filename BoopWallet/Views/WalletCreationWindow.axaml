@@ -1,18 +1,96 @@
-<Window xmlns="https://github.com/avaloniaui"
+<Window xmlns:i="https://github.com/projektanker/icons.avalonia"
+		xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         x:Class="BoopWallet.Views.WalletCreationWindow"
         Title="Creating wallet..."
-		Width="500"
+		Width="600"
 		Height="450"
 		Background="#363759">
 
 	<StackPanel Margin="10">
+		
 		<TextBlock Text="Creating wallet..."
 				   FontSize="24"
-				   Margin="0 0 0 20"
+				   Margin="0 0 0 10"
 				   Foreground="White"/>
-		<!-- Add wallet creation here -->
+		
+		<TextBlock Foreground="White"
+				   FontSize="16"
+				   TextWrapping="Wrap">
+			<Run Text="To be able to check wallet balance you only need the public key." />
+			<Run Text="(except XMR)" Foreground="Gray"/>
+			<LineBreak/>
+			supported coins:
+		</TextBlock>
+		<!--crypto choice-->
+		<ComboBox x:Name="CryptoChoiceCombobox"
+				  Width="200"
+				  HorizontalAlignment="Left"/>
+		
+		<!--public key hidder-->
+		<StackPanel x:Name="PublicKeyField" IsVisible="False">
+		<!--public key-->
+		<TextBlock Text="public key:"
+		   FontSize="16"
+		   Margin="0 10 0 0"
+		   Foreground="White"
+		   TextWrapping="Wrap"/>
+
+		<TextBox x:Name="PublicKeyBox"
+			Width="400"
+			HorizontalAlignment="Left"
+			IsVisible="True"/>
+		</StackPanel>
+		
+		<!--private key hidder-->
+		<StackPanel x:Name="PrivateKeyField" IsVisible="False">
+		<!--private key-->
+		<TextBlock Text="private key:"
+		   FontSize="16"
+		   Margin="0 10 0 0"
+		   Foreground="White" />
+
+		<Grid Width="400" HorizontalAlignment="Left">
+			<TextBox x:Name="PrivateKeyBoxHidden"
+					 Width="400"
+					 PasswordChar="●"
+					 HorizontalAlignment="Left"
+					 IsVisible="True"/>
+
+			<TextBox x:Name="PrivateKeyBoxVisible"
+					 Width="400"
+					 HorizontalAlignment="Left"
+					 IsVisible="False"/>
+
+			<Button x:Name="ShowKeyButton"
+					IsHitTestVisible="True"
+					Focusable="False"
+					ZIndex="10"
+					i:Attached.Icon="fa-solid fa-eye-slash"
+					Foreground="White"
+					Margin="0 0 0 0"
+					Width="36"
+					HorizontalAlignment="Right"
+					VerticalAlignment="Center"
+					Background="Transparent"/>
+			</Grid>
+		</StackPanel>
+		
+		<!--recovery phrase/mnemonic hidder-->
+		<StackPanel x:Name="RecoveryPhraseField" IsVisible="False">
+		<!--recovery phrase/mnemonic-->
+		<TextBlock Text="recovery / mnemonic / seed phrase:"
+		   FontSize="16"
+		   Margin="0 10 0 0"
+		   Foreground="White" />
+		
+		<TextBox x:Name="RecoveryPhraseBox"
+			 Width="400"
+			 Height="80"
+			 HorizontalAlignment="Left"
+			 IsVisible="True"/>
+		</StackPanel>
 	</StackPanel>
 </Window>

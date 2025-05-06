@@ -14,6 +14,7 @@
     <PackageReference Include="Avalonia.Skia" Version="11.3.0" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
     <PackageReference Include="Avalonia.Themes.Simple" Version="11.3.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Projektanker.Icons.Avalonia.FontAwesome" Version="9.6.1" />
   </ItemGroup>
 

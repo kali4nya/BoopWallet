@@ -1,0 +1,16 @@
+{
+  "BTC": {
+    "Required": [
+      "publicKey",
+      "privateKey",
+      "recoveryPhrase"
+    ]
+  },
+  "ETH": {
+    "Required": [
+      "publicKey",
+      "recoveryPhrase",
+      "recoveryPhrase"
+    ]
+  }
+}
