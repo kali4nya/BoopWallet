@@ -1,0 +1,40 @@
+<Window xmlns:i="https://github.com/projektanker/icons.avalonia"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        x:Class="BoopWallet.Views.SettingsWindow"
+        Title="Settings"
+        Width="500"
+        Height="450"
+		Background="#363759">
+
+	<Grid Margin="10">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*"/>
+			<!-- Content -->
+			<RowDefinition Height="Auto"/>
+			<!-- Bottom button -->
+		</Grid.RowDefinitions>
+
+		<!-- Content Area -->
+		<StackPanel Grid.Row="0" Spacing="10">
+			<TextBlock Text="Settings Page"
+					   FontSize="24"
+					   Foreground="White"/>
+			<!-- Add settings controls here -->
+			<Button
+                x:Name="CreateWalletButton"
+                Content="Create wallet"
+                Foreground="White"
+                FontSize="25"/>
+		</StackPanel>
+
+		<!-- Bottom Button -->
+		<Button Grid.Row="1"
+				x:Name="ChangePasswordButton"
+                Content="Change password"
+				Foreground="White"
+				FontSize="25"/>
+	</Grid>
+</Window>

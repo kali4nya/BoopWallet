@@ -37,11 +37,16 @@
 				<StackPanel>
 					<TextBlock Foreground="White" Margin="10">Menu</TextBlock>
 					<Button Content="Home" Margin="-1 0" Width="150" Foreground="White"/>
-					<Button Content="Settings" Margin="-1 0" Width="150" Foreground="White"/>
+					<Button Content="Something" Margin="-1 0" Width="150" Foreground="White"/>
 				</StackPanel>
 
 				<!-- Bottom button -->
-				<Button i:Attached.Icon="fa-solid fa-gear" Grid.Row="1" Foreground="White" Margin="-1 0" FontSize="25"/>
+				<Button i:Attached.Icon="fa-solid fa-gear"
+						x:Name="SettingsButton"
+						Grid.Row="1"
+						Foreground="White"
+						Margin="-1 0"
+						FontSize="25"/>
 			</Grid>
 
 			<!-- Main Content -->
