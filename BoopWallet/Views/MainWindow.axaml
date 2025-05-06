@@ -1,0 +1,53 @@
+<Window
+		xmlns:i="https://github.com/projektanker/icons.avalonia"
+		xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:BoopWallet.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="clr-namespace:BoopWallet.Views"
+        x:Class="BoopWallet.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="BoopWallet"
+		Background="#1f2033"
+		Width="1050"
+		Height="600">
+
+		<Window.Styles>
+			<Style Selector="Window">
+				<Setter Property="FontSize" Value="18"/>
+				<Setter Property="Foreground" Value="White"/>
+			</Style>
+		</Window.Styles>
+
+		<Grid>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="150" /> <!-- Sidebar width -->
+				<ColumnDefinition Width="*" /> <!-- Main content -->
+			</Grid.ColumnDefinitions>
+
+			<!-- Sidebar -->
+			<Grid Grid.Column="0" Background="#8b62a4">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="*" /> <!-- Fills available space -->
+					<RowDefinition Height="Auto"/> <!-- Button row -->
+				</Grid.RowDefinitions>
+
+				<!-- Top part (menu items, etc.) -->
+				<StackPanel>
+					<TextBlock Foreground="White" Margin="10">Menu</TextBlock>
+					<Button Content="Home" Margin="-1 0" Width="150" Foreground="White"/>
+					<Button Content="Settings" Margin="-1 0" Width="150" Foreground="White"/>
+				</StackPanel>
+
+				<!-- Bottom button -->
+				<Button i:Attached.Icon="fa-solid fa-gear" Grid.Row="1" Foreground="White" Margin="-1 0" FontSize="25"/>
+			</Grid>
+
+			<!-- Main Content -->
+			<Border Background="#1f2033" Grid.Column="1">
+				<TextBlock Margin="10" Text="Welcome to the app!" Foreground="White"></TextBlock>
+			</Border>
+		</Grid>
+
+</Window>
