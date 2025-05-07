@@ -14,11 +14,6 @@ public partial class WalletCreationWindow : Window
     {
         InitializeComponent();
         HookPasswordToggle(ShowKeyButton, PrivateKeyBoxHidden, PrivateKeyBoxVisible);
-        LoadComboBoxItems("crypto_options.json");
-    }
-    public class CryptoEntry
-    {
-        public List<string> Supported { get; set; }
     }
     private void HookPasswordToggle(Button toggleButton, TextBox hiddenBox, TextBox visibleBox)
     {
@@ -41,38 +36,5 @@ public partial class WalletCreationWindow : Window
                 Attached.SetIcon(toggleButton, "fa-solid fa-eye-slash");
             }
         };
-    }
-    private void LoadComboBoxItems(string jsonFilePath)
-    {
-        Dictionary<string, CryptoEntry> options;
-
-        if (!File.Exists(jsonFilePath))
-        {
-            options = new Dictionary<string, CryptoEntry>
-            {
-                ["BTC"] = new CryptoEntry
-                {
-                    Supported = new List<string> { "publicKey", "privateKey", "recoveryPhrase" }
-                },
-                ["ETH"] = new CryptoEntry
-                {
-                    Supported = new List<string> { "publicKey", "privateKey", "recoveryPhrase" }
-                }
-            };
-
-            var json = JsonSerializer.Serialize(options, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(jsonFilePath, json);
-        }
-        else
-        {
-            var jsonData = File.ReadAllText(jsonFilePath);
-            options = JsonSerializer.Deserialize<Dictionary<string, CryptoEntry>>(jsonData);
-        }
-
-        CryptoChoiceCombobox.Items.Clear();
-        foreach (var key in options.Keys)
-        {
-            CryptoChoiceCombobox.Items.Add(key);
-        }
     }
 }
