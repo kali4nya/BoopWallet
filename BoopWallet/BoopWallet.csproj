@@ -18,6 +18,8 @@
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
     <PackageReference Include="Avalonia.Themes.Simple" Version="11.3.0" />
+    <PackageReference Include="Konscious.Security.Cryptography.Argon2" Version="1.3.1" />
+    <PackageReference Include="NBitcoin" Version="8.0.8" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Projektanker.Icons.Avalonia.FontAwesome" Version="9.6.1" />
   </ItemGroup>
@@ -25,6 +27,9 @@
   <ItemGroup>
     <Compile Update="SettingsWindow.axaml.cs">
       <DependentUpon>SettingsWindow.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\ConfirmWithPasswordWindow.axaml.cs">
+      <DependentUpon>ConfirmWithPasswordWindow.axaml</DependentUpon>
     </Compile>
   </ItemGroup>
 </Project>

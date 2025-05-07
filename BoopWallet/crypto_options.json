@@ -1,0 +1,16 @@
+{
+  "BTC": {
+    "Supported": [
+      "publicKey",
+      "privateKey",
+      "recoveryPhrase"
+    ]
+  },
+  "ETH": {
+    "Supported": [
+      "publicKey",
+      "privateKey",
+      "recoveryPhrase"
+    ]
+  }
+}
