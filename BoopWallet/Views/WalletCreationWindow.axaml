@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         x:Class="BoopWallet.Views.WalletCreationWindow"
         Title="Creating wallet..."
-		Width="600"
+		Width="650"
 		Height="480"
 		Background="#363759">
 
@@ -54,14 +54,14 @@
 					<LineBreak/>
 					<Run Text="(limited functionality)" Foreground="Gray"/>
 				</TextBlock>
-				<Grid Width="400" HorizontalAlignment="Left">
+				<Grid Width="500" HorizontalAlignment="Left">
 					<TextBox x:Name="PrivateKeyBoxHidden"
-							 Width="400"
+							 Width="500"
 							 PasswordChar="●"
 							 HorizontalAlignment="Left"
 							 IsVisible="True"/>
 					<TextBox x:Name="PrivateKeyBoxVisible"
-							 Width="400"
+							 Width="500"
 							 HorizontalAlignment="Left"
 							 IsVisible="False"/>
 					<Button x:Name="ShowKeyButton"
@@ -92,6 +92,10 @@
 						 Height="80"
 						 HorizontalAlignment="Left"
 						 IsVisible="True"/>
+				<TextBlock Foreground="White"
+						 FontSize="12"
+						 TextWrapping="Wrap"
+						 Text="unused fields leave empty"/>
 			</StackPanel>
 		</StackPanel>
 

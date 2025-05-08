@@ -1,0 +1,15 @@
+{
+    "BTC": {
+      "publicKey": "somePublicKey",
+
+      "privateKey": {
+        "privateKey": "somePrivateKey",
+        "privateKeySalt": "somePrivateKeySalt"
+      },
+
+      "recoveryPhrase":{
+        "someRecoveryPhrase": "someRecoveryPhrase",
+        "recoveryPhraseSalt": "someRecoveryPhraseSalt"
+        }
+    }
+  }

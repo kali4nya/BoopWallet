@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Projektanker.Icons.Avalonia;
+using System;
 using System.Threading.Tasks;
 
 namespace BoopWallet.Views;
@@ -16,6 +17,11 @@ public partial class ConfirmWithPasswordWindow : Window
         HookPasswordToggle(ShowPasswordButton, PasswordBoxHidden, PasswordBoxVisible);
         CancelButton.Click += CancelButton_Click;
         ConfirmButton.Click += ConfirmButton_Click;
+        this.Closed += OnClosed;
+    }
+    private void OnClosed(object? sender, EventArgs e)
+    {
+        _passwordTaskSource.TrySetResult(null);
     }
     private void HookPasswordToggle(Button toggleButton, TextBox hiddenBox, TextBox visibleBox)
     {
@@ -50,9 +56,9 @@ public partial class ConfirmWithPasswordWindow : Window
         _passwordTaskSource.TrySetResult(PasswordBoxHidden.Text);
         Close();
     }
-    public Task<string?> ShowDialogAsync(Window parent)
+    public async Task<string?> ShowDialogAsync(Window parent)
     {
-        base.ShowDialog(parent);
-        return _passwordTaskSource.Task;
+        await base.ShowDialog(parent);
+        return await _passwordTaskSource.Task;
     }
 }

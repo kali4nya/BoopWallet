@@ -58,7 +58,7 @@ public partial class PasswordChangeWindow : Window
         string oldPasswordHash = passwordFile[0];
         string oldPasswordSalt = passwordFile[1];
 
-        string EnteredOldPasswordRaw = null;
+        string? EnteredOldPasswordRaw = null;
         if (OldPasswordBoxHidden.IsVisible == true)
         {
             EnteredOldPasswordRaw = string.IsNullOrEmpty(OldPasswordBoxHidden.Text) ? "123" : OldPasswordBoxHidden.Text;
@@ -74,7 +74,7 @@ public partial class PasswordChangeWindow : Window
         if (enteredOldPasswordHash == oldPasswordHash)
         {
             //checking if the new password is the same as the repeated password
-            string newPasswordRaw = null;
+            string? newPasswordRaw = null;
             if (PasswordBoxHidden.IsVisible == true)
             {
                 newPasswordRaw = string.IsNullOrEmpty(PasswordBoxHidden.Text) ? "123" : PasswordBoxHidden.Text;
@@ -83,7 +83,7 @@ public partial class PasswordChangeWindow : Window
             {
                 newPasswordRaw = string.IsNullOrEmpty(PasswordBoxVisible.Text) ? "123" : PasswordBoxVisible.Text;
             }
-            string repeatedPasswordRaw = null;
+            string? repeatedPasswordRaw = null;
             if (RepeatPasswordBoxHidden.IsVisible == true)
             {
                 repeatedPasswordRaw = string.IsNullOrEmpty(RepeatPasswordBoxHidden.Text) ? "123" : RepeatPasswordBoxHidden.Text;

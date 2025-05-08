@@ -4,7 +4,7 @@ using Konscious.Security.Cryptography;
 
 public class PasswordHasher
 {
-    public static Tuple<string, string> HashPassword(string password, int timeCost = 4, int memoryCost = 65536, int parallelism = 1, int hashLength = 64, byte[] salt = null)
+    public static Tuple<string, string> HashPassword(string password, int timeCost = 4, int memoryCost = 65536, int parallelism = 1, int hashLength = 64, byte[]? salt = null)
     {
         if (salt == null)
         {

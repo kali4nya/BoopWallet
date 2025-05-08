@@ -93,12 +93,56 @@ public partial class WalletCreationWindow : Window
     {
         this.Close();
     }
-    private void CreateButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private async void CreateButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         string ?SelectedCrypto = CryptoChoiceCombobox?.SelectedItem?.ToString();
         if (SelectedCrypto == "BTC")
         {
+            string? publicKey = PublicKeyBox.Text;
+            string? privateKey = null;
+            if (PrivateKeyBoxHidden.IsVisible)
+            {
+                privateKey = PrivateKeyBoxHidden.Text;
+            }
+            else
+            {
+                privateKey = PrivateKeyBoxVisible.Text;
 
+            }
+            string? recovryPhrase = RecoveryPhraseBox.Text;
+
+            //public key only wallet
+            if (!string.IsNullOrEmpty(publicKey) && string.IsNullOrEmpty(privateKey) && string.IsNullOrEmpty(recovryPhrase))
+            {
+                PublicKeyOnlyWallet_BTC(publicKey);
+            }
+
+            //private key only wallet
+            if (string.IsNullOrEmpty(publicKey) && !string.IsNullOrEmpty(privateKey) && string.IsNullOrEmpty(recovryPhrase))
+            {
+                var prompt = new ConfirmWithPasswordWindow();
+                string? password = await prompt.ShowDialogAsync(this);
+
+                if (!string.IsNullOrEmpty(password))
+                {
+                    PrivateKeyOnlyWallet_BTC(privateKey, password);
+                }//else {user has closed the window.... bruh, will make it unclosable later}
+            }
+            //public and private ket wallet
+            if (!string.IsNullOrEmpty(publicKey) && !string.IsNullOrEmpty(privateKey) && string.IsNullOrEmpty(recovryPhrase))
+            {
+                var prompt = new ConfirmWithPasswordWindow();
+                string? password = await prompt.ShowDialogAsync(this);
+
+                if (!string.IsNullOrEmpty(password))
+                {
+                    PrivateKeyAndPublicKeyWallet_BTC(publicKey, privateKey, password);
+                }//129
+            }
+
+            //full wallet
+
+            this.Close();
         }
     }
 }
