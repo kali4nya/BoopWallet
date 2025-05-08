@@ -133,11 +133,14 @@ public class WalletCreation_BTC
                 recoveryPhraseSalt: null
             );
 
-            // so now that the user can make a wallet using his private key OR using his public ket(just balance cheking)
-            // we need to make it possible for the user to actually use both and somehow check if the private key matches the public key (no idea how)
-            // then we can make a wallet using the recovery phrase
+            // make a wallet using the recovery phrase
+            // this is going to be very complicated cause im thinking we change the wallet saving architecture and in file we save the
+            // private key in all formats (taproot, legacy,) (encrypted of course) so that the user later while managing the wallet (making transactions)
+            // (recieving etc) has the option to view his main (0/0/0/0/0) wallet adress but also can generate new ones (0/0/0/0/0/1)(also in all formats...)
         }
     }
+
+    //probably complete AI slop but kinda works
     public static bool DoesKeyMatch(string privKeyInput, string publicKeyInput)
     {
         if (string.IsNullOrWhiteSpace(privKeyInput) || string.IsNullOrWhiteSpace(publicKeyInput))
@@ -307,6 +310,7 @@ public class WalletCreation_BTC
 
         return result.Skip(leadingZeroCount).ToArray();
     }
+    //
 
     public static void PrivateKeyAndPublicKeyWallet_BTC(string publicKey, string privateKey, string password)
     {
