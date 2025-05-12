@@ -35,7 +35,7 @@
 				<TextBlock Foreground="White"
 						   FontSize="16"
 						   TextWrapping="Wrap">
-					<Run Text="public key:" />
+					<Run Text="public key or address:" />
 					<LineBreak/>
 					<Run Text="(balance checking only)" Foreground="Gray"/>
 				</TextBlock>

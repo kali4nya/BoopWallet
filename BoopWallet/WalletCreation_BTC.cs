@@ -8,7 +8,9 @@ using System.Text;
 using NBitcoin;
 
 using static PasswordHasher;
+using static KeyEncrypter;
 using Avalonia.Platform.Storage;
+using NBitcoin.DataEncoders;
 
 public class WalletCreation_BTC
 {
@@ -16,12 +18,16 @@ public class WalletCreation_BTC
     {
         public string? PrivateKey { get; set; }
         public string? PrivateKeySalt { get; set; }
+        public string? PrivateKeyIV { get; set; }
+        public string? PrivateKeyHmac { get; set; }
     }
 
     public class RecoveryPhraseData
     {
         public string? SomeRecoveryPhrase { get; set; }
         public string? RecoveryPhraseSalt { get; set; }
+        public string? RecoveryPhraseIV { get; set; }
+        public string? RecoveryPhraseHmac { get; set; }
     }
 
     public class WalletData
@@ -32,16 +38,22 @@ public class WalletCreation_BTC
     }
     //creating and saving the wallet
     public static void SaveWalletToFile(
-       string? currency,
-       string? publicKey,
-       string? privateKey,
-       string? privateKeySalt,
-       string? recoveryPhrase,
-       string? recoveryPhraseSalt,
-       string? outputDirectory = null // optional: allow custom directory
-   )
+    string? currency,
+    string? publicKey,
+    string? privateKey,
+    string? privateKeySalt,
+    string? privateKeyIV,
+    string? privateKeyHmac,
+    string? recoveryPhrase,
+    string? recoveryPhraseSalt,
+    string? recoveryPhraseIV,
+    string? recoveryPhraseHmac,
+    string? outputDirectory = null // optional: allow custom directory
+)
     {
-        // Build wallet data
+        if (string.IsNullOrWhiteSpace(currency))
+            throw new ArgumentException("Currency cannot be null or whitespace.", nameof(currency));
+
         var data = new Dictionary<string, WalletData>
         {
             [currency] = new WalletData
@@ -50,31 +62,33 @@ public class WalletCreation_BTC
                 PrivateKey = new PrivateKeyData
                 {
                     PrivateKey = privateKey,
-                    PrivateKeySalt = privateKeySalt
+                    PrivateKeySalt = privateKeySalt,
+                    PrivateKeyIV = privateKeyIV,
+                    PrivateKeyHmac = privateKeyHmac
                 },
                 RecoveryPhrase = new RecoveryPhraseData
                 {
                     SomeRecoveryPhrase = recoveryPhrase,
-                    RecoveryPhraseSalt = recoveryPhraseSalt
+                    RecoveryPhraseSalt = recoveryPhraseSalt,
+                    RecoveryPhraseIV = recoveryPhraseIV,
+                    RecoveryPhraseHmac = recoveryPhraseHmac
                 }
             }
         };
+
         string jsonString = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
 
-        // Set directory (default: current)
         string directory = string.IsNullOrWhiteSpace(outputDirectory)
             ? Directory.GetCurrentDirectory()
             : outputDirectory;
 
-        // Ensure directory exists
         Directory.CreateDirectory(directory);
 
-        // Determine next available file name
         string baseFileName = $"wallet_{currency}_";
         var existingFiles = Directory.GetFiles(directory, $"{baseFileName}*.json");
 
         int maxIndex = 0;
-        var regex = new Regex($@"{baseFileName}(\d+)\.json");
+        var regex = new Regex($@"{Regex.Escape(baseFileName)}(\d+)\.json");
 
         foreach (var file in existingFiles)
         {
@@ -89,12 +103,12 @@ public class WalletCreation_BTC
         int nextIndex = maxIndex + 1;
         string finalFileName = Path.Combine(directory, $"{baseFileName}{nextIndex}.json");
 
-        // Save JSON
         File.WriteAllText(finalFileName, jsonString, Encoding.UTF8);
         Console.WriteLine($"Saved wallet data to: {finalFileName}");
     }
 
-//public key only wallet
+
+    //public key only wallet
     public static void PublicKeyOnlyWallet_BTC(string publicKey)
     {
             SaveWalletToFile(
@@ -102,8 +116,12 @@ public class WalletCreation_BTC
                 publicKey: publicKey,
                 privateKey: null,
                 privateKeySalt: null,
+                privateKeyIV: null,
+                privateKeyHmac: null,
                 recoveryPhrase: null,
-                recoveryPhraseSalt: null
+                recoveryPhraseSalt: null,
+                recoveryPhraseIV: null,
+                recoveryPhraseHmac: null
         );
     }
     //private key only wallet
@@ -120,17 +138,19 @@ public class WalletCreation_BTC
 
         if (passwordHash == enteredPasswordHash)
         {
-            var privateKeyHashingResults = HashPassword(privateKey);
-            string privateKeyHash = privateKeyHashingResults.Item1;
-            string privateKeyHashSalt = privateKeyHashingResults.Item2;
+            var encrypted = KeyEncrypter.EncryptPrivateKey(privateKey, password);
 
             SaveWalletToFile(
                 currency: "BTC",
                 publicKey: null,
-                privateKey: privateKeyHash,
-                privateKeySalt: privateKeyHashSalt,
+                privateKey: Convert.ToBase64String(encrypted.cipherText),
+                privateKeySalt: Convert.ToBase64String(encrypted.salt),
+                privateKeyIV: Convert.ToBase64String(encrypted.iv),
+                privateKeyHmac: Convert.ToBase64String(encrypted.hmac),
                 recoveryPhrase: null,
-                recoveryPhraseSalt: null
+                recoveryPhraseSalt: null,
+                recoveryPhraseIV: null,
+                recoveryPhraseHmac: null
             );
 
             // make a wallet using the recovery phrase
@@ -141,174 +161,114 @@ public class WalletCreation_BTC
     }
 
     //probably complete AI slop but kinda works
-    public static bool DoesKeyMatch(string privKeyInput, string publicKeyInput)
+    public static bool DoesKeyMatch(string privKeyInput, string publicKeyOrAddressInput, Network network = null)
     {
-        if (string.IsNullOrWhiteSpace(privKeyInput) || string.IsNullOrWhiteSpace(publicKeyInput))
-            throw new ArgumentException("Private key and public key must be non-empty strings.");
+        if (string.IsNullOrWhiteSpace(privKeyInput) || string.IsNullOrWhiteSpace(publicKeyOrAddressInput))
+            throw new ArgumentException("Inputs must be non-empty.");
 
-        byte[] pubKeyBytes;
+        network ??= Network.Main;
 
+        Key key = ParsePrivateKey(privKeyInput, network);
+
+        // Check if the input is a valid Bitcoin address
         try
         {
-            // Detect and handle the format of the provided public key
-            pubKeyBytes = ParsePublicKey(publicKeyInput);
+            var address = BitcoinAddress.Create(publicKeyOrAddressInput, network);
+            var derivedAddress = key.PubKey.GetAddress(ScriptPubKeyType.Legacy, network);
+            return derivedAddress.ToString() == address.ToString();
         }
         catch
         {
-            throw new ArgumentException("Provided public key is not in a valid format.");
+            // Not an address, so fall back to public key parsing
         }
 
-        Key key;
+        // Otherwise, assume it's a raw public key and try to parse/compare
+        var pubKeyBytes = ParsePublicKey(publicKeyOrAddressInput);
 
-        // Case 1: WIF input (legacy/SegWit)
-        if (privKeyInput.StartsWith("5") || privKeyInput.StartsWith("K") || privKeyInput.StartsWith("L"))
+        return pubKeyBytes.Length switch
         {
-            try
-            {
-                key = Key.Parse(privKeyInput, Network.Main);
-            }
-            catch
-            {
-                throw new ArgumentException("Invalid WIF private key.");
-            }
-        }
-        // Case 2: raw hex private key
-        else if (privKeyInput.Length == 64)
-        {
-            try
-            {
-                byte[] privKeyBytes = Convert.FromHexString(privKeyInput);
-                key = new Key(privKeyBytes);
-            }
-            catch
-            {
-                throw new ArgumentException("Private key is not valid hex.");
-            }
-        }
-        else
-        {
-            throw new ArgumentException("Unsupported private key format.");
-        }
-
-        // Compare based on public key length/type
-        if (pubKeyBytes.Length == 65) // uncompressed
-        {
-            bool isMatch = key.PubKey.Decompress().ToBytes().SequenceEqual(pubKeyBytes);
-            return isMatch;
-        }
-        else if (pubKeyBytes.Length == 33) // compressed
-        {
-            bool isMatch = key.PubKey.Compress().ToBytes().SequenceEqual(pubKeyBytes);
-            return isMatch;
-        }
-        else if (pubKeyBytes.Length == 32) // x-only Taproot pubkey
-        {
-            byte[] xOnlyPubKey = key.PubKey.ToBytes().Skip(1).ToArray(); // remove prefix (02/03)
-            bool isMatch = xOnlyPubKey.SequenceEqual(pubKeyBytes);
-            return isMatch;
-        }
-        else
-        {
-            throw new ArgumentException("Unrecognized public key format.");
-        }
+            33 => key.PubKey.Compress().ToBytes().SequenceEqual(pubKeyBytes),
+            65 => key.PubKey.Decompress().ToBytes().SequenceEqual(pubKeyBytes),
+            32 => key.PubKey.Compress().ToBytes()[1..].SequenceEqual(pubKeyBytes), // x-only pubkey
+            _ => throw new ArgumentException("Unrecognized public key format (expected 32/33/65 bytes).")
+        };
     }
 
-    // Helper method to parse the public key input in different formats
-    private static byte[] ParsePublicKey(string publicKeyInput)
+    private static Key ParsePrivateKey(string privKeyInput, Network network)
     {
-        // Try base58 decoding first (common for WIF keys)
         try
         {
-            // If it's base58, decode it into a byte array
-            if (IsBase58(publicKeyInput))
-            {
-                return Base58Decode(publicKeyInput);
-            }
-        }
-        catch { /* ignore, try next formats */ }
-
-        // Try base64 decoding
-        try
-        {
-            if (IsBase64(publicKeyInput))
-            {
-                return Convert.FromBase64String(publicKeyInput);
-            }
-        }
-        catch { /* ignore, try next formats */ }
-
-        // Try hex string decoding
-        try
-        {
-            return Convert.FromHexString(publicKeyInput);
-        }
-        catch { /* ignore, proceed to next */ }
-
-        // Try raw byte array decoding if it's a string representation
-        try
-        {
-            return Encoding.UTF8.GetBytes(publicKeyInput); // for cases where it's passed as a non-standard format
+            return Key.Parse(privKeyInput, network);
         }
         catch
         {
-            throw new ArgumentException("Unrecognized public key format.");
+            if (IsValidHex(privKeyInput) && privKeyInput.Length == 64)
+            {
+                try
+                {
+                    byte[] privKeyBytes = Convert.FromHexString(privKeyInput);
+                    return new Key(privKeyBytes);
+                }
+                catch
+                {
+                    throw new ArgumentException("Invalid hex private key.");
+                }
+            }
+
+            throw new ArgumentException("Private key is neither valid WIF nor raw hex.");
         }
     }
 
-    // Helper method to check if the string is Base58 encoded
-    private static bool IsBase58(string input)
+    private static byte[] ParsePublicKey(string input)
     {
-        // A quick check for base58 characters
+        // Try hex
+        if (IsValidHex(input))
+        {
+            var bytes = Convert.FromHexString(input);
+            if (bytes.Length is 33 or 65 or 32)
+                return bytes;
+        }
+
+        // Try base64
+        if (IsValidBase64(input))
+        {
+            try
+            {
+                var bytes = Convert.FromBase64String(input);
+                if (bytes.Length is 33 or 65 or 32)
+                    return bytes;
+            }
+            catch { }
+        }
+
+        // Try base58
+        if (IsLikelyBase58(input))
+        {
+            try
+            {
+                var decoded = Encoders.Base58.DecodeData(input);
+                if (decoded.Length is 33 or 65 or 32)
+                    return decoded;
+            }
+            catch { }
+        }
+
+        throw new ArgumentException("Public key format not recognized or invalid.");
+    }
+
+    private static bool IsValidHex(string input) =>
+        input.Length % 2 == 0 && input.All(Uri.IsHexDigit);
+
+    private static bool IsValidBase64(string input)
+    {
+        Span<byte> buffer = new Span<byte>(new byte[input.Length]);
+        return Convert.TryFromBase64String(input, buffer, out _);
+    }
+
+    private static bool IsLikelyBase58(string input)
+    {
         const string base58Chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
         return input.All(c => base58Chars.Contains(c));
-    }
-
-    // Helper method to check if the string is Base64 encoded
-    private static bool IsBase64(string input)
-    {
-        try
-        {
-            Convert.FromBase64String(input);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    // Custom Base58 decoder function
-    private static byte[] Base58Decode(string input)
-    {
-        // Base58 alphabet
-        const string base58Chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-        int length = input.Length;
-
-        // Prepare the result array
-        byte[] result = new byte[length];
-
-        // Decode Base58 into a byte array
-        for (int i = 0; i < length; i++)
-        {
-            int digit = base58Chars.IndexOf(input[i]);
-            if (digit == -1) throw new ArgumentException("Invalid Base58 character");
-
-            for (int j = result.Length - 1; j >= 0; j--)
-            {
-                digit += result[j] * 58;
-                result[j] = (byte)(digit % 256);
-                digit /= 256;
-            }
-        }
-
-        // Strip leading zero bytes
-        int leadingZeroCount = 0;
-        while (leadingZeroCount < length && result[leadingZeroCount] == 0)
-        {
-            leadingZeroCount++;
-        }
-
-        return result.Skip(leadingZeroCount).ToArray();
     }
     //
 
@@ -325,19 +285,22 @@ public class WalletCreation_BTC
 
         if (passwordHash == enteredPasswordHash)
         {
-            var privateKeyHashingResults = HashPassword(privateKey);
-            string privateKeyHash = privateKeyHashingResults.Item1;
-            string privateKeyHashSalt = privateKeyHashingResults.Item2;
+            var encrypted = KeyEncrypter.EncryptPrivateKey(privateKey, password);
+
 
             if (DoesKeyMatch(privateKey, publicKey) == true)
             {
                 SaveWalletToFile(
                     currency: "BTC",
                     publicKey: publicKey,
-                    privateKey: privateKeyHash,
-                    privateKeySalt: privateKeyHashSalt,
+                    privateKey: Convert.ToBase64String(encrypted.cipherText),
+                    privateKeySalt: Convert.ToBase64String(encrypted.salt),
+                    privateKeyIV: Convert.ToBase64String(encrypted.iv),
+                    privateKeyHmac: Convert.ToBase64String(encrypted.hmac),
                     recoveryPhrase: null,
-                    recoveryPhraseSalt: null
+                    recoveryPhraseSalt: null,
+                    recoveryPhraseIV: null,
+                    recoveryPhraseHmac: null
                 );
             }
             else
