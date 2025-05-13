@@ -20,4 +20,4 @@ Right now, BoopWallet is still under development. That means:
 
 also its like 50% vibe coded soooo
 **Please don't use it to store actuall crypto yet**
-if you encounter any problems let me know :3
+if you encounter any problems or have any suggestions let me know :3
