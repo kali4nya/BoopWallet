@@ -13,10 +13,11 @@ Right now, BoopWallet is still under development. That means:
 
 ## 🔐 Security Goals (Eventually™)
 
-Even though it’s early, BoopWallet is being built with a focus on security:
-
 - 🧂 **Argon2** is used for password hashing — resistant to brute force and designed for secure key derivation.
 - 🔐 **AES-256** encryption is used for storing private keys and addresses.
 
+<sub><i>README written mostly by ChatGPT 🤖</i></sub>
+
+also its like 50% vibe coded soooo
 *Please don't use it to store actuall crypto yet*
 if you encounter any problems let me know :3
